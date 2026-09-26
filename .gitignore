@@ -1,0 +1,10 @@
+venv/
+saved_models/
+*.pyc
+__pycache__/
+.ipynb_checkpoints/
+*.h5
+*.pt
+*.pth
+data/
+.env
