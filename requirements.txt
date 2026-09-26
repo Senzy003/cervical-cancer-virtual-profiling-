@@ -1,1 +1,15 @@
 # Generated via: pip freeze > requirements.txt
+torch
+torchvision
+pillow
+numpy
+pandas
+scikit-learn
+matplotlib
+opencv-python
+fastapi
+uvicorn
+python-multipart
+streamlit
+requests
+tqdm
