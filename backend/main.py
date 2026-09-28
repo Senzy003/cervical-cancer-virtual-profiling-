@@ -27,7 +27,7 @@ from preprocessing.process import preprocess_image_bytes
 # ---------------------------------------------------------------- settings
 # Final targets are confirmed once the data teammate checks which proteins
 # are in the TCGA-CESC RPPA file. Order MUST match the model's outputs.
-TARGETS = os.getenv("VPP_TARGETS", "PD-L1,p16,Ki-67").split(",")
+TARGETS = os.getenv("VPP_TARGETS", "PD-L1,p16,Cyclin B1,phospho-Rb,E-cadherin").split(",")
 WEIGHTS_PATH = Path(os.getenv("VPP_WEIGHTS", "weights/model.pt"))
 DEMO_DIR = Path(os.getenv("VPP_DEMO_DIR", "demo_cases"))
 MAX_UPLOAD_BYTES = 20 * 1024 * 1024  # 20 MB
@@ -38,9 +38,11 @@ DISCLAIMER = ("Research prototype for decision support only. "
 
 # Plain-language meaning of a "High" call, shown in the UI.
 MEANINGS = {
-    "PD-L1": "Possible immunotherapy candidate: prioritise confirmatory PD-L1 testing.",
+    "PD-L1": "Possible immunotherapy candidate: prioritise confirmatory PD-L1 (CPS) testing.",
     "p16": "Pattern consistent with HPV-driven disease.",
-    "Ki-67": "High proliferation: more aggressive tumour biology.",
+    "Cyclin B1": "High proliferation: more aggressive tumour biology.",
+    "phospho-Rb": "Active cell-cycle signalling, consistent with HPV E7 disrupting Rb.",
+    "E-cadherin": "Cells remain cohesive; low levels suggest invasive behaviour.",
 }
 
 
