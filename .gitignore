@@ -8,3 +8,9 @@ __pycache__/
 *.pth
 data/
 .env
+*.svs
+*.h5
+*.pt
+data/
+weights/
+__pycache__/
