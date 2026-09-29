@@ -18,6 +18,7 @@ from pathlib import Path
 import torch
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
 from model.model_architecture import ProteinExpressionModel
@@ -65,6 +66,11 @@ if DEMO_DIR.exists():
     # Heatmaps and thumbnails served at /static/<case_id>/...
     app.mount("/static", StaticFiles(directory=DEMO_DIR), name="static")
 
+FRONTEND_DIR = Path(__file__).parent / "frontend"
+if FRONTEND_DIR.exists():
+    # The demo UI, served at /app/
+    app.mount("/app", StaticFiles(directory=FRONTEND_DIR, html=True), name="app")
+
 
 # ---------------------------------------------------------------- model
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -83,7 +89,9 @@ model.eval()  # prediction mode: no dropout, fixed batch-norm
 # ---------------------------------------------------------------- routes
 @app.get("/")
 def home():
-    """Check that the API is running."""
+    """Open the demo UI if it exists, otherwise confirm the API is running."""
+    if FRONTEND_DIR.exists():
+        return RedirectResponse("/app/")
     return {"message": "Virtual Protein Profiling API is running"}
 
 
