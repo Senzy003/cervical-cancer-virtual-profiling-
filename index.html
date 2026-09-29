@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Virtual Protein Profiling</title>
+  <link rel="icon" href="logo.png">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <img src="logo.png" alt="" class="brand-logo">
+      <div>
+        <h1>Virtual Protein Profiling</h1>
+        <p>Cervical cancer · protein expression predicted from routine H&amp;E</p>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <span class="badge badge-warn">Research prototype</span>
+      <button class="btn btn-ghost" id="model-card-btn">Model card</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <!-- Case list -->
+    <aside class="panel cases">
+      <h2 class="panel-title">Cases</h2>
+      <p class="panel-note">Held-out patients: the model never saw these during training.</p>
+      <ul id="case-list" class="case-list"><li class="muted">Loading cases…</li></ul>
+    </aside>
+
+    <!-- Slide viewer -->
+    <section class="panel viewer-panel">
+      <div class="viewer-head">
+        <div>
+          <h2 class="panel-title" id="case-title">Select a case</h2>
+          <p class="panel-note" id="case-summary"></p>
+        </div>
+        <div class="viewer-tools">
+          <div class="segmented" role="group" aria-label="View">
+            <button data-view="slide">Slide</button>
+            <button data-view="heatmap" class="active">Heatmap</button>
+          </div>
+          <label class="opacity">Overlay
+            <input type="range" id="opacity" min="0" max="100" value="100">
+          </label>
+          <div class="zoom">
+            <button class="btn btn-icon" id="zoom-out" aria-label="Zoom out">−</button>
+            <button class="btn btn-icon" id="zoom-reset" aria-label="Reset zoom">⤢</button>
+            <button class="btn btn-icon" id="zoom-in" aria-label="Zoom in">+</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="protein-tabs" id="protein-tabs" role="tablist"></div>
+
+      <div class="viewer" id="viewer">
+        <div class="stage" id="stage">
+          <img id="img-slide" alt="Slide thumbnail">
+          <img id="img-heat" alt="Attention heatmap">
+        </div>
+        <div class="viewer-empty" id="viewer-empty">Choose a case to view its slide.</div>
+      </div>
+      <div class="legend">
+        <span>Low attention</span><div class="legend-bar"></div><span>High attention</span>
+        <span class="legend-hint">Drag to pan · scroll to zoom</span>
+      </div>
+
+      <div class="evidence">
+        <h3 id="evidence-title">What drove this call</h3>
+        <p class="panel-note">Tissue regions the model weighted most for the selected protein.</p>
+        <div class="patches" id="patches"></div>
+      </div>
+    </section>
+
+    <!-- Protein profile -->
+    <aside class="panel profile">
+      <h2 class="panel-title">Protein profile</h2>
+      <div id="cards-strong"></div>
+      <details class="exploratory" id="exploratory-wrap">
+        <summary>Exploratory markers <span class="muted">(evidence not yet conclusive)</span></summary>
+        <div id="cards-exploratory"></div>
+      </details>
+    </aside>
+  </main>
+
+  <footer class="disclaimer" id="disclaimer">
+    Research prototype for decision support only. Not a diagnosis; confirm with laboratory testing.
+  </footer>
+
+  <!-- Model card -->
+  <dialog id="model-card">
+    <div class="dialog-head">
+      <h2>Model card</h2>
+      <button class="btn btn-icon" id="model-card-close" aria-label="Close">×</button>
+    </div>
+    <div id="model-card-body"><p class="muted">Loading…</p></div>
+  </dialog>
+
+  <script src="app.js"></script>
+</body>
+</html>
