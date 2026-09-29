@@ -26,6 +26,9 @@ import openslide
 import pandas as pd
 from matplotlib import colormaps
 from PIL import Image
+from scipy.ndimage import gaussian_filter
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import KFold
 
 THUMB_WIDTH = 1600
 TOP_K = 4
@@ -50,7 +53,8 @@ def percentile_scores(attention):
 
 
 def heatmap_overlay(thumb, coords, scores, patch_level0, scale, alpha=0.5):
-    """Paint each patch's score onto the thumbnail and blend."""
+    """Paint each patch's score onto the thumbnail, smooth it so gaps between
+    sampled patches fill in, and blend it over the tissue."""
     h, w = thumb.shape[:2]
     total = np.zeros((h, w), np.float32)
     count = np.zeros((h, w), np.float32)
@@ -59,13 +63,48 @@ def heatmap_overlay(thumb, coords, scores, patch_level0, scale, alpha=0.5):
         x0, y0 = int(x * scale), int(y * scale)
         total[y0:y0 + size, x0:x0 + size] += score
         count[y0:y0 + size, x0:x0 + size] += 1
-    covered = count > 0
+
+    # Normalised convolution: average nearby patch scores, ignoring empty areas
+    sigma = max(size * 1.0, 1.0)
+    total_s = gaussian_filter(total, sigma)
+    count_s = gaussian_filter(count, sigma)
+    region = gaussian_filter((count > 0).astype(np.float32), sigma) > 0.5
     values = np.zeros_like(total)
-    values[covered] = total[covered] / count[covered]
+    values[region] = total_s[region] / np.maximum(count_s[region], 1e-6)
+    if region.any():  # stretch to the full colour range
+        low, high = np.percentile(values[region], [1, 99])
+        values = np.clip((values - low) / max(high - low, 1e-6), 0, 1)
+
     colours = (colormaps["inferno"](values)[..., :3] * 255).astype(np.float32)
     out = thumb.astype(np.float32)
-    out[covered] = (1 - alpha) * out[covered] + alpha * colours[covered]
+    out[region] = (1 - alpha) * out[region] + alpha * colours[region]
     return Image.fromarray(out.clip(0, 255).astype(np.uint8))
+
+
+def calibrate(predictions, targets, seed=0):
+    """Platt-scale the model's held-out scores so that displayed probabilities
+    are honest. The raw attention-model outputs are over-confident (often 0 or
+    1). Each patient's calibrated value comes from a calibration fit on the
+    OTHER folds of patients, so no patient calibrates their own prediction."""
+    calibrated = pd.DataFrame(index=predictions.index)
+    for t in targets:
+        p = predictions[f"{t}_abmil"].clip(1e-6, 1 - 1e-6).to_numpy()
+        z = np.log(p / (1 - p)).reshape(-1, 1)
+        y = predictions[f"{t}_true"].to_numpy()
+        labelled = np.where(~np.isnan(y))[0]
+        out = np.full(len(p), np.nan)
+
+        folds = KFold(5, shuffle=True, random_state=seed).split(labelled)
+        for train, test in folds:
+            model = LogisticRegression(C=1.0).fit(z[labelled[train]], y[labelled[train]])
+            out[labelled[test]] = model.predict_proba(z[labelled[test]])[:, 1]
+        unlabelled = np.where(np.isnan(y))[0]  # middle-third patients
+        if len(unlabelled):
+            model = LogisticRegression(C=1.0).fit(z[labelled], y[labelled])
+            out[unlabelled] = model.predict_proba(z[unlabelled])[:, 1]
+        calibrated[f"{t}_abmil"] = out
+        calibrated[f"{t}_true"] = y
+    return calibrated
 
 
 def choose_patients(predictions, targets, n):
@@ -103,7 +142,8 @@ def main():
     results = Path(args.results)
     config = json.loads((results / "config.json").read_text())
     targets = config["targets"]
-    predictions = pd.read_csv(results / "oof_predictions.csv", index_col="patient")
+    raw = pd.read_csv(results / "oof_predictions.csv", index_col="patient")
+    predictions = calibrate(raw, targets)
     slide_files = pd.read_csv(args.cases).set_index("patient")["file_name"]
     metrics = pd.read_csv(results / "metrics.csv")
     abmil = metrics[metrics.model == "abmil"].set_index("protein")
@@ -145,12 +185,13 @@ def main():
                 patch.convert("RGB").resize((256, 256)).save(folder / f"top_{safe(name)}_{k}.png")
                 tops.append(f"/static/{patient}/top_{safe(name)}_{k}.png")
 
-            prob = float(predictions.loc[patient, f"{name}_abmil"])
+            prob = float(predictions.loc[patient, f"{name}_abmil"])  # calibrated
             truth = predictions.loc[patient, f"{name}_true"]
             cards.append({
                 "protein": name,
                 "call": "High" if prob >= 0.5 else "Low",
                 "probability_high": round(prob, 3),
+                "raw_model_score": round(float(raw.loc[patient, f"{name}_abmil"]), 3),
                 "true_value": None if pd.isna(truth) else ("High" if truth == 1 else "Low"),
                 "model_auc": None if pd.isna(auc.get(name)) else round(float(auc[name]), 2),
                 "auc_ci_low": None if pd.isna(ci_low.get(name)) else round(float(ci_low[name]), 2),
