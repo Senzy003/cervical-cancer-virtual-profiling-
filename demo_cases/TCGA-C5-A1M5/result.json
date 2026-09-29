@@ -1,0 +1,78 @@
+{
+  "case_id": "TCGA-C5-A1M5",
+  "summary": "Held-out case: 4/5 proteins match lab values",
+  "thumbnail": "/static/TCGA-C5-A1M5/thumbnail.png",
+  "predictions": [
+    {
+      "protein": "PD-L1",
+      "call": "Low",
+      "probability_high": 0.0,
+      "true_value": "Low",
+      "model_auc": 0.68,
+      "heatmap": "/static/TCGA-C5-A1M5/heatmap_PD-L1.png",
+      "top_patches": [
+        "/static/TCGA-C5-A1M5/top_PD-L1_1.png",
+        "/static/TCGA-C5-A1M5/top_PD-L1_2.png",
+        "/static/TCGA-C5-A1M5/top_PD-L1_3.png",
+        "/static/TCGA-C5-A1M5/top_PD-L1_4.png"
+      ]
+    },
+    {
+      "protein": "p16",
+      "call": "Low",
+      "probability_high": 0.002,
+      "true_value": null,
+      "model_auc": 0.58,
+      "heatmap": "/static/TCGA-C5-A1M5/heatmap_p16.png",
+      "top_patches": [
+        "/static/TCGA-C5-A1M5/top_p16_1.png",
+        "/static/TCGA-C5-A1M5/top_p16_2.png",
+        "/static/TCGA-C5-A1M5/top_p16_3.png",
+        "/static/TCGA-C5-A1M5/top_p16_4.png"
+      ]
+    },
+    {
+      "protein": "Cyclin B1",
+      "call": "High",
+      "probability_high": 0.999,
+      "true_value": "High",
+      "model_auc": 0.49,
+      "heatmap": "/static/TCGA-C5-A1M5/heatmap_Cyclin_B1.png",
+      "top_patches": [
+        "/static/TCGA-C5-A1M5/top_Cyclin_B1_1.png",
+        "/static/TCGA-C5-A1M5/top_Cyclin_B1_2.png",
+        "/static/TCGA-C5-A1M5/top_Cyclin_B1_3.png",
+        "/static/TCGA-C5-A1M5/top_Cyclin_B1_4.png"
+      ]
+    },
+    {
+      "protein": "phospho-Rb",
+      "call": "High",
+      "probability_high": 0.995,
+      "true_value": "High",
+      "model_auc": 0.67,
+      "heatmap": "/static/TCGA-C5-A1M5/heatmap_phospho-Rb.png",
+      "top_patches": [
+        "/static/TCGA-C5-A1M5/top_phospho-Rb_1.png",
+        "/static/TCGA-C5-A1M5/top_phospho-Rb_2.png",
+        "/static/TCGA-C5-A1M5/top_phospho-Rb_3.png",
+        "/static/TCGA-C5-A1M5/top_phospho-Rb_4.png"
+      ]
+    },
+    {
+      "protein": "E-cadherin",
+      "call": "High",
+      "probability_high": 1.0,
+      "true_value": "High",
+      "model_auc": 0.6,
+      "heatmap": "/static/TCGA-C5-A1M5/heatmap_E-cadherin.png",
+      "top_patches": [
+        "/static/TCGA-C5-A1M5/top_E-cadherin_1.png",
+        "/static/TCGA-C5-A1M5/top_E-cadherin_2.png",
+        "/static/TCGA-C5-A1M5/top_E-cadherin_3.png",
+        "/static/TCGA-C5-A1M5/top_E-cadherin_4.png"
+      ]
+    }
+  ],
+  "disclaimer": "Research prototype for decision support only. Not a diagnosis; confirm with laboratory testing."
+}
